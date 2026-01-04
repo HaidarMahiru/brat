@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brat Generator API</title>
+    <style>
+        /* Desain ala Brat Album (Simpel & Raw) */
+        body {
+            background-color: #8ace00; /* Hijau Brat */
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 { font-size: 1.5rem; margin-bottom: 20px; }
+
+        .container {
+            background: rgba(255, 255, 255, 0.4);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        input {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid black;
+            border-radius: 5px;
+            outline: none;
+            text-align: center;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: black;
+            color: #8ace00;
+            border: none;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover { opacity: 0.8; }
+        button:disabled { background: gray; cursor: not-allowed; }
+
+        #result-area {
+            margin-top: 20px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        img { max-width: 100%; border-radius: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #333;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .api-link { margin-top: 20px; font-size: 12px; color: #333; }
+        code { background: rgba(0,0,0,0.1); padding: 2px 5px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Brat Generator API</h1>
+        
+        <input type="text" id="TextInput" placeholder="Ketik sesuatu..." value="Aufa">
+        <br>
+        <button onclick="generateBrat()" id="btnGenerate">GENERATE</button>
+
+        <div id="result-area">
+            <div class="loader" id="loader"></div>
+            <img id="resultImage" style="display: none;">
+        </div>
+
+        <div class="api-link">
+            Endpoint API: <br>
+            <code id="apiEndpoint">/api/brat?text=...</code>
+        </div>
+    </div>
+
+    <script>
+        async function generateBrat() {
+            const text = document.getElementById('TextInput').value;
+            const img = document.getElementById('resultImage');
+            const loader = document.getElementById('loader');
+            const btn = document.getElementById('btnGenerate');
+
+            if(!text) return alert("Isi teks dulu!");
+
+            // Tampilkan Loading
+            img.style.display = 'none';
+            loader.style.display = 'block';
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+
+            try {
+                // Panggil API Backend kita sendiri
+                const apiUrl = `/api/brat?text=${encodeURIComponent(text)}`;
+                
+                // Fetch blob agar bisa dicek errornya
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) throw new Error('Gagal mengambil data');
+
+                const blob = await response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+
+                img.src = imageUrl;
+                img.onload = () => {
+                    img.style.display = 'block';
+                    loader.style.display = 'none';
+                    btn.disabled = false;
+                    btn.innerText = "GENERATE";
+                };
+
+                // Update link text untuk info user
+                document.getElementById('apiEndpoint').innerText = window.location.origin + apiUrl;
+
+            } catch (error) {
+                alert("Error: " + error.message);
+                loader.style.display = 'none';
+                btn.disabled = false;
+                btn.innerText = "GENERATE";
+            }
+        }
+    </script>
+</body>
+</html>
