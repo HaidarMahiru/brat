@@ -1,0 +1,11 @@
+{
+  "name": "brat-api-scraper",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node api/index.js"
+  },
+  "dependencies": {
+    "puppeteer-core": "^21.0.0",
+    "@sparticuz/chromium": "^119.0.0"
+  }
+}
